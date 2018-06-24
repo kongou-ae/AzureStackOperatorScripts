@@ -1,4 +1,12 @@
 $ErrorActionPreference = "stop"
+
+Try {
+    Get-AzsLocation | Out-Null
+} Catch {
+    Write-Error "Please login Azure Stack before you execute this script" 
+    Break 
+}
+
 $instances = Get-AzsInfrastructureRoleInstance
 $instances | 
     Select-Object Name, `
