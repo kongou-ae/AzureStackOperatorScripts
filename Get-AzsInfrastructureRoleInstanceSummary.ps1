@@ -1,3 +1,4 @@
+$ErrorActionPreference = "stop"
 $instances = Get-AzsInfrastructureRoleInstance
 $instances | 
     Select-Object Name, `
