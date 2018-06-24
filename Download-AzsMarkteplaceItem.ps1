@@ -10,7 +10,7 @@ $ErrorActionPreference = "stop"
 Try {
     Get-AzsLocation | Out-Null
 } Catch {
-    Write-Error "Please login Azure Stack before execute this script" 
+    Write-Error "Please login Azure Stack before you execute this script" 
     Break 
 }
 
