@@ -60,7 +60,7 @@ $regex.Matches($Owner) | ForEach {
     $AADTenantName = $_.value.Replace("@","")
 }
 
-$ADauth = (Get-AzureRmEnvironment -Name $EnvironmentName).ActiveDirectoryAuthority
+$ADauth = (Get-AzureRmEnvironment -Name "AzureStackAdmin").ActiveDirectoryAuthority
 $endpt = "{0}{1}/.well-known/openid-configuration" -f $ADauth, $AADTenantName
 $OauthMetadata = (Invoke-WebRequest -UseBasicParsing $endpt).Content | ConvertFrom-Json
 $AADid = $OauthMetadata.Issuer.Split('/')[3]
