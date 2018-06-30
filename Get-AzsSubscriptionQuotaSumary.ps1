@@ -4,11 +4,6 @@
 .EXAMPLE
 #>
 
-Param(
-  [parameter(mandatory = $true)][String]$UserSubscriptionId
-
-)
-
 $ErrorActionPreference = "stop"
 
 function ShowHeader($RP) {
@@ -18,7 +13,7 @@ function ShowHeader($RP) {
     Write-Output "------------------------------------------------------------------------"
 }
 
-$Sub = Get-AzsUserSubscription -SubscriptionId $UserSubscriptionId
+$Sub = Get-AzsUserSubscription | Out-GridView -PassThru
 $offer = Get-AzureRmResource -ResourceId $sub.OfferId
 $AddonPlan = $offer.Properties.AddonPlans
 $basePlan = Get-AzsPlan -ResourceId $offer.Properties.BasePlanIds[0]
