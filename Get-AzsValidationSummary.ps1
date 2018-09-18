@@ -29,7 +29,7 @@ $sharename = $date + $foldername
 If (!(Test-Path "$($Env:SystemDrive)\$($sharename)")) {
     $folder = New-Item -Path "$($Env:SystemDrive)\$($sharename)" -ItemType directory
 } 
-$foldershare= New-SMBShare –Name $sharename –Path "$($Env:SystemDrive)\$($sharename)" -FullAccess $myname
+$foldershare= New-SMBShare -Name $sharename -Path "$($Env:SystemDrive)\$($sharename)" -FullAccess $myname
 $testconnect = Test-NetConnection -port 5985 -ComputerName $ercs
 $hostIp = $testconnect.SourceAddress.IPAddress
 $shareInfo = "\\$hostIp\$($foldershare.Name)"
