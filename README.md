@@ -41,6 +41,10 @@ local/AzS-WASP01   Running     2        8 s-cluster WIN-xxxxxxxxxxx
 local/AzS-Xrp01    Running     4        8 s-cluster WIN-xxxxxxxxxxx
 ```
 
+## Get-AzsUpdateProgress.ps1
+
+Show the status of update as GridView.
+
 ## Get-AzsValidationSummary.ps1
 
 Download the latest AzureStack_Validation_Summary.html.
