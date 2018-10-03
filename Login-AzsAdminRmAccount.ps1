@@ -13,8 +13,8 @@ $ErrorActionPreference = "stop"
 Write-Output "Installing modules"
 Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted 
 Install-Module -Name AzureRm.BootStrapper -Scope CurrentUser -AllowClobber
-Use-AzureRmProfile -Profile 2017-03-09-profile -Force -Scope CurrentUser 
-Install-Module -Name AzureStack -RequiredVersion 1.3.0 -Scope CurrentUser -AllowClobber
+Use-AzureRmProfile -Profile 2018-03-01-hybrid -Force -Scope CurrentUser 
+Install-Module -Name AzureStack -Scope CurrentUser -AllowClobber
 
 $ArmEndpoint = "https://adminmanagement." + $fqdn
 
