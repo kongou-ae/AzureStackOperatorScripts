@@ -18,9 +18,11 @@ foreach( $StorageAccount in  $StorageAccounts ){
 
             $matchText = [RegEx]::Matches($template ,'"Title":\s\{\s*"Text"\:\s(".*?")')
             $matchDesc = [RegEx]::Matches($template ,'"Description":\s\{\s*"Text"\:\s(".*?")')
+            $matchSev = [RegEx]::Matches($template ,'"Severity":\s(".*?")')
 
             for($i=0; $i -lt $matchText.Count; $i++ ){
                 Write-host "- $($matchText[$i].Groups[1].Value)"
+                Write-Host "  - $($matchSev[$i].Groups[1].Value)"
                 Write-host "  - $($matchDesc[$i].Groups[1].Value)"
             }
         }
