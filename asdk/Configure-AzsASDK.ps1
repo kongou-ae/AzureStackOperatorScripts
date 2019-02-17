@@ -53,6 +53,7 @@ choco feature enable -n allowGlobalConfirmation
 choco install googlechrome
 choco install vscode
 
+
 #######################################################################
 # PowerShell
 #######################################################################
