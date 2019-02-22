@@ -141,10 +141,32 @@ $list | foreach {
     }
 }
 
+$list | foreach {
+    if ($_.Name -like "default/microsoft.sqlserver2016sp2enterprisewindowsserver2016-arm*"){
+        $sql2016ent = $_
+    }
+}
+
+$list | foreach {
+    if ($_.Name -like "default/microsoft.sqliaasextension-*"){
+        $sqlextension = $_
+    }
+}
+
+
+
 Invoke-AzsAzureBridgeProductDownload -ResourceId $win2016.Id -AsJob -Force | Out-Null
 Invoke-AzsAzureBridgeProductDownload -ResourceId $win2016core.Id -AsJob -Force | Out-Null
 Invoke-AzsAzureBridgeProductDownload -ResourceId $psDsc.Id -AsJob -Force | Out-Null
 Invoke-AzsAzureBridgeProductDownload -ResourceId $sql2016ent.Id -AsJob -Force | Out-Null
+Invoke-AzsAzureBridgeProductDownload -ResourceId $sqlextension.Id -AsJob -Force | Out-Null
+
+do {
+    Write-Output "Checking the progress of $($sqlextension.GalleryItemIdentity)..."
+    $result = Get-AzsAzureBridgeDownloadedProduct  `
+        -ResourceGroupName $resourceGroupName -ActivationName $activation.Name -Name $sqlextension.Name
+    Sleep -Seconds 30
+} while($result.ProvisioningState -ne "Succeeded")
 
 do {
     Write-Output "Checking the progress of $($psDsc.GalleryItemIdentity)..."
@@ -173,3 +195,53 @@ do {
         -ResourceGroupName $resourceGroupName -ActivationName $activation.Name -Name $sql2016ent.Name
     Sleep -Seconds 30
 } while($result.ProvisioningState -ne "Succeeded")
+
+#######################################################################
+# Deploy App Service infra
+#######################################################################
+
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/Azure/AzureStack-QuickStart-Templates/master/appservice-fileserver-sqlserver-ha/azuredeploy.json -OutFile appsinfra-azuredeploy.json
+
+$appsPassword = "P@ssw0rd000000" | ConvertTo-SecureString -AsPlainText -Force
+
+New-AzureRmResourceGroup -Name "apps-infra" -Location "local"
+$result = New-AzureRmResourceGroupDeployment -ResourceGroupName apps-infra `
+  -DeploymentName apps-infta `
+  -TemplateUri C:\Users\AzureStackAdmin\appsinfra-azuredeploy.json `
+  -adminPassword $appsPassword -fileShareOwnerPassword $appsPassword -fileShareUserPassword $appsPassword `
+  -sqlServerServiceAccountPassword $appsPassword -sqlLoginPassword $appsPassword
+
+$apsfileSharePath = $result.Outputs["fileSharePath"].Value
+$apsfileShareOwner = $result.Outputs["fileShareOwner"].Value
+$apsfileShareUser = $result.Outputs["fileShareUser"].Value
+$apssqLserver = $result.Outputs["sqLserver"].Value
+$apssqlUser = $result.Outputs["sqlUser"].Value
+
+# PIP for SQL0
+
+$sqlpip = New-AzureRmPublicIpAddress -Name sql0 -ResourceGroupName apps-infra -Location local -AllocationMethod Static
+$sqlnic = Get-AzureRmNetworkInterface -ResourceGroupName apps-infra -Name aps-sql-0-nic
+$sqlnic.IpConfigurations[0].PublicIpAddress = $sqlpip
+Set-AzureRmNetworkInterface -NetworkInterface $sqlnic
+
+# NSG for SQL0
+$sqlNsg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName apps-infra -Name aps-sql-Nsg
+
+Add-AzureRmNetworkSecurityRuleConfig `
+  -Name "RDP" `
+  -NetworkSecurityGroup $sqlNsg `
+  -Description "RDP" `
+  -Protocol "TCP" `
+  -SourcePortRange "*" `
+  -DestinationPortRange "3389" `
+  -SourceAddressPrefix "*" `
+  -DestinationAddressPrefix "VirtualNetwork" `
+  -Access "Allow" `
+  -Priority "100" `
+  -Direction "Inbound"
+
+Set-AzureRmNetworkSecurityGroup -NetworkSecurityGroup $sqlNsg
+
+#######################################################################
+# Deploy App Service RP
+#######################################################################
