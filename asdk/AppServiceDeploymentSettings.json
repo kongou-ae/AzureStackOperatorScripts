@@ -67,7 +67,7 @@
     "SelectedLargeWorkerSKUs": {
         "name": "Standard_A3"
     },
-    "FileShareUNCPath": "\\\\<<FileServerDNSLabel>>\\Websites",
+    "FileShareUNCPath": "\\\\fs01.appsvc.local\\Websites",
     "FileServerSKUs": "Standard_A1",
     "FileShareOwner": "FileShareOwner",
     "FileShareOwnerPassword": "P@ssw0rdP@ssw0rd",
@@ -84,8 +84,8 @@
     "ResourceProviderPfxCertPassword": "P@ssw0rdP@ssw0rd",
     "PublisherPfxCertPath": "C:\Users\AzureStackAdmin\AppServiceHelperScripts\ftp.appservice.local.azurestack.external.pfx",
     "PublisherPfxCertPassword": "P@ssw0rdP@ssw0rd",
-    "SQLServerName": "<<SQLServerName>>",
-    "SQLSysAdminLogin": "<<SQLServerUser>>",
+    "SQLServerName": "10.0.1.100",
+    "SQLSysAdminLogin": "sqlsa",
     "SQLSysAdminPassword": "P@ssw0rdP@ssw0rd",
     "SelectedControllerInstances": 1,
     "SelectedManagementRoleInstances": 1,
