@@ -67,7 +67,7 @@
     "SelectedLargeWorkerSKUs": {
         "name": "Standard_A3"
     },
-    "FileShareUNCPath": "\\\\fs01.appsvc.local\\Websites",
+    "FileShareUNCPath": "\\fs01.appsvc.local\Websites",
     "FileServerSKUs": "Standard_A1",
     "FileShareOwner": "FileShareOwner",
     "FileShareOwnerPassword": "P@ssw0rdP@ssw0rd",
