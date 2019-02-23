@@ -86,7 +86,7 @@
     "PublisherPfxCertPassword": "P@ssw0rdP@ssw0rd",
     "SQLServerName": "10.0.1.100",
     "SQLSysAdminLogin": "sqlsa",
-    "SQLSysAdminPassword": "P@ssw0rdP@ssw0rd",
+    "SQLSysAdminPassword": "P@ssw0rd000000",
     "SelectedControllerInstances": 1,
     "SelectedManagementRoleInstances": 1,
     "SelectedPublisherRoleInstances": 1,
