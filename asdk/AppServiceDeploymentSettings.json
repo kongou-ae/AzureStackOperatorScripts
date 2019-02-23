@@ -1,0 +1,105 @@
+{
+    "AzureResourceManagerDnsSuffix": "adminmanagement.local.azurestack.external",
+    "TenantAzureResourceManagerDnsSuffix": "management.local.azurestack.external",
+    "AzureDirectoryTenantName": "aimless2.onmicrosoft.com",
+    "IdentityApplicationId": "<<IdentityApplicationId>>",
+    "VirtualNetwork": {
+        "name": "AppServiceVirtualNetwork",
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "10.200.0.0/16"
+                ]
+            }
+        }
+    },
+    "ControllersSubnet": {
+        "name": "ControllersSubnet",
+        "properties": {
+            "addressPrefix": "10.200.0.0/24"
+        }
+    },
+    "ManagementServersSubnet": {
+        "name": "ManagementServersSubnet",
+        "properties": {
+            "addressPrefix": "10.200.1.0/24"
+        }
+    },
+    "FrontEndsSubnet": {
+        "name": "FrontEndsSubnet",
+        "properties": {
+            "addressPrefix": "10.200.2.0/24"
+        }
+    },
+    "PublishersSubnet": {
+        "name": "PublishersSubnet",
+        "properties": {
+            "addressPrefix": "10.200.3.0/24"
+        }
+    },
+    "WorkersSubnet": {
+        "name": "WorkersSubnet",
+        "properties": {
+            "addressPrefix": "10.200.8.0/21"
+        }
+    },
+    "SelectedControllerSKUs": {
+        "name": "Standard_A2"
+    },
+    "SelectedManagementRoleSKUs": {
+        "name": "Standard_A2"
+    },
+    "SelectedPublisherRoleSKUs": {
+        "name": "Standard_A2"
+    },
+    "SelectedFrontEndRoleSKUs": {
+        "name": "Standard_A2"
+    },
+    "SelectedWorkerSKUs": {
+        "name": "Standard_A2"
+    },
+    "SelectedSmallWorkerSKUs": {
+        "name": "Standard_A1_v2"
+    },
+    "SelectedMediumWorkerSKUs": {
+        "name": "Standard_A2"
+    },
+    "SelectedLargeWorkerSKUs": {
+        "name": "Standard_A3"
+    },
+    "FileShareUNCPath": "\\\\<<FileServerDNSLabel>>\\Websites",
+    "FileServerSKUs": "Standard_A1",
+    "FileShareOwner": "FileShareOwner",
+    "FileShareOwnerPassword": "P@ssw0rdP@ssw0rd",
+    "FileShareUser": "FileShareUser",
+    "FileShareUserPassword": "P@ssw0rdP@ssw0rd",
+    "ResourceGroupName": "appservice-infra",
+    "StorageAccountName": "appsvclocalstor",
+    "IdentityPfxCertPath": "C:\Users\AzureStackAdmin\AppServiceHelperScripts\sso.appservice.local.azurestack.external.pfx",
+    "IdentityPfxCertPassword": "P@ssw0rdP@ssw0rd",
+    "RootCertPath": "C:\Users\AzureStackAdmin\AppServiceHelperScripts\AzureStackCertificationAuthority.cer",
+    "DefaultPfxCertPath": "C:\Users\AzureStackAdmin\AppServiceHelperScripts\_.appservice.local.azurestack.external.pfx",
+    "DefaultPfxCertPassword": "P@ssw0rdP@ssw0rd",
+    "ResourceProviderPfxCertPath": "C:\Users\AzureStackAdmin\AppServiceHelperScripts\api.appservice.local.azurestack.external.pfx",
+    "ResourceProviderPfxCertPassword": "P@ssw0rdP@ssw0rd",
+    "PublisherPfxCertPath": "C:\Users\AzureStackAdmin\AppServiceHelperScripts\ftp.appservice.local.azurestack.external.pfx",
+    "PublisherPfxCertPassword": "P@ssw0rdP@ssw0rd",
+    "SQLServerName": "<<SQLServerName>>",
+    "SQLSysAdminLogin": "<<SQLServerUser>>",
+    "SQLSysAdminPassword": "P@ssw0rdP@ssw0rd",
+    "SelectedControllerInstances": 1,
+    "SelectedManagementRoleInstances": 1,
+    "SelectedPublisherRoleInstances": 1,
+    "SelectedFrontEndRoleInstances": 1,
+    "SelectedWorkerInstances": 1,
+    "PlatformImage": {
+        "Publisher": "MicrosoftWindowsServer",
+        "Offer": "WindowsServer",
+        "name": "2016-Datacenter",
+        "Version": "latest"
+    },
+    "WorkerVirtualMachineAdministrator": "workeradmin",
+    "WorkerVirtualMachinePassword": "P@ssw0rdP@ssw0rd",
+    "OtherVirtualMachineAdministrator": "roleadmin",
+    "OtherVirtualMachinePassword": "P@ssw0rdP@ssw0rd"
+}
