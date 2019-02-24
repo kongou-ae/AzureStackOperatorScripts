@@ -73,7 +73,7 @@
     "FileShareOwnerPassword": "P@ssw0rd000000",
     "FileShareUser": "appsvc.local\\FileShareUser",
     "FileShareUserPassword": "P@ssw0rd000000",
-    "ResourceGroupName": "appservice-infra",
+    "ResourceGroupName": "apps-infra",
     "StorageAccountName": "appsvclocalstor",
     "IdentityPfxCertPath": "C:\\Users\\appsvcadmin.APS-SQL-0\\Documents\\sso.appservice.local.azurestack.external.pfx",
     "IdentityPfxCertPassword": "P@ssw0rdP@ssw0rd",
