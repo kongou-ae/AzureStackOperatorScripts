@@ -14,31 +14,31 @@
         }
     },
     "ControllersSubnet": {
-        "name": "ControllersSubnet",
+        "name": "ControllerSubnet",
         "properties": {
             "addressPrefix": "10.0.3.0/24"
         }
     },
     "ManagementServersSubnet": {
-        "name": "ManagementServersSubnet",
+        "name": "ManagementSubnet",
         "properties": {
             "addressPrefix": "10.0.4.0/24"
         }
     },
     "FrontEndsSubnet": {
-        "name": "FrontEndsSubnet",
+        "name": "FrontendSubnet",
         "properties": {
             "addressPrefix": "10.0.6.0/24"
         }
     },
     "PublishersSubnet": {
-        "name": "PublishersSubnet",
+        "name": "PublisherSubnet",
         "properties": {
             "addressPrefix": "10.0.5.0/24"
         }
     },
     "WorkersSubnet": {
-        "name": "WorkersSubnet",
+        "name": "WorkerSubnet",
         "properties": {
             "addressPrefix": "10.0.8.0/24"
         }
