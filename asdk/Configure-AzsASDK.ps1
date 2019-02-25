@@ -1,5 +1,10 @@
 $ErrorActionPreference = "stop"
- 
+
+$CloudAdminCredential = Get-Credential -Credential azurestack\CloudAdmin
+$aadAdminCredential = Get-Credential -Message "Please input the account which you used to deplpoy ASDK"
+$ArmEndpoint = "https://adminmanagement.local.azurestack.external"
+$AADTenantName = "aimless2.onmicrosoft.com" 
+
 #######################################################################
 # Azure-Stack-Tools
 #######################################################################
@@ -24,9 +29,6 @@ $azureContext = Login-AzureRmAccount
 
 Import-Module C:\Users\AzureStackAdmin\AzureStack-Tools-master\Connect\AzureStack.Connect.psm1
 
-$ArmEndpoint = "https://adminmanagement.local.azurestack.external"
-$AADTenantName = "aimless2.onmicrosoft.com" 
-
 Add-AzureRMEnvironment `
   -Name "AzureStackAdmin" `
   -ArmEndpoint $ArmEndpoint
@@ -38,8 +40,6 @@ $TenantID = Get-AzsDirectoryTenantId `
 $azsContext = Login-AzureRmAccount `
   -Environment AzureStackAdmin `
   -TenantId $TenantID
-
-Get-AzureRmContext -ListAvailable | where {$_.Environment -eq "AzureStackAdmin"} | Set-AzureRmContext
 
 #######################################################################
 # Register
@@ -153,6 +153,12 @@ $list | foreach {
     }
 }
 
+$list | foreach {
+    if ($_.Name -like "default/microsoft.customscriptextension-arm-1.9.1*"){
+        $customscript = $_
+    }
+}
+
 
 
 Invoke-AzsAzureBridgeProductDownload -ResourceId $win2016.Id -AsJob -Force | Out-Null
@@ -160,6 +166,7 @@ Invoke-AzsAzureBridgeProductDownload -ResourceId $win2016core.Id -AsJob -Force |
 Invoke-AzsAzureBridgeProductDownload -ResourceId $psDsc.Id -AsJob -Force | Out-Null
 Invoke-AzsAzureBridgeProductDownload -ResourceId $sql2016ent.Id -AsJob -Force | Out-Null
 Invoke-AzsAzureBridgeProductDownload -ResourceId $sqlextension.Id -AsJob -Force | Out-Null
+Invoke-AzsAzureBridgeProductDownload -ResourceId $customscript.Id -AsJob -Force | Out-Null
 
 do {
     Write-Output "Checking the progress of $($sqlextension.GalleryItemIdentity)..."
@@ -167,6 +174,14 @@ do {
         -ResourceGroupName $resourceGroupName -ActivationName $activation.Name -Name $sqlextension.Name
     Sleep -Seconds 30
 } while($result.ProvisioningState -ne "Succeeded")
+
+do {
+    Write-Output "Checking the progress of $($customscript.GalleryItemIdentity)..."
+    $result = Get-AzsAzureBridgeDownloadedProduct  `
+        -ResourceGroupName $resourceGroupName -ActivationName $activation.Name -Name $customscript.Name
+    Sleep -Seconds 30
+} while($result.ProvisioningState -ne "Succeeded")
+
 
 do {
     Write-Output "Checking the progress of $($psDsc.GalleryItemIdentity)..."
@@ -204,6 +219,8 @@ Invoke-WebRequest -Uri https://raw.githubusercontent.com/Azure/AzureStack-QuickS
 
 $appsPassword = "P@ssw0rd000000" | ConvertTo-SecureString -AsPlainText -Force
 
+Get-AzureRmContext -ListAvailable | where {$_.Environment -like "AzureStackAdmin*"} | Set-AzureRmContext
+
 New-AzureRmResourceGroup -Name "apps-infra" -Location "local"
 $result = New-AzureRmResourceGroupDeployment -ResourceGroupName apps-infra `
   -DeploymentName apps-infta `
@@ -228,20 +245,108 @@ Set-AzureRmNetworkInterface -NetworkInterface $sqlnic
 $sqlNsg = Get-AzureRmNetworkSecurityGroup -ResourceGroupName apps-infra -Name aps-sql-Nsg
 
 Add-AzureRmNetworkSecurityRuleConfig `
-  -Name "RDP" `
-  -NetworkSecurityGroup $sqlNsg `
-  -Description "RDP" `
-  -Protocol "TCP" `
-  -SourcePortRange "*" `
-  -DestinationPortRange "3389" `
-  -SourceAddressPrefix "*" `
-  -DestinationAddressPrefix "VirtualNetwork" `
-  -Access "Allow" `
-  -Priority "100" `
-  -Direction "Inbound"
+-Name "RDP" `
+-NetworkSecurityGroup $sqlNsg `
+-Description "RDP" `
+-Protocol "TCP" `
+-SourcePortRange "*" `
+-DestinationPortRange "3389" `
+-SourceAddressPrefix "*" `
+-DestinationAddressPrefix "VirtualNetwork" `
+-Access "Allow" `
+-Priority "100" `
+-Direction "Inbound"
+
+Set-AzureRmNetworkSecurityGroup -NetworkSecurityGroup $sqlNsg
+
+Add-AzureRmNetworkSecurityRuleConfig `
+-Name "winrm" `
+-NetworkSecurityGroup $sqlNsg `
+-Description "winrm" `
+-Protocol "TCP" `
+-SourcePortRange "*" `
+-DestinationPortRange "5985" `
+-SourceAddressPrefix "*" `
+-DestinationAddressPrefix "VirtualNetwork" `
+-Access "Allow" `
+-Priority "110" `
+-Direction "Inbound"
 
 Set-AzureRmNetworkSecurityGroup -NetworkSecurityGroup $sqlNsg
 
 #######################################################################
 # Deploy App Service RP
 #######################################################################
+
+# Get certs
+Invoke-WebRequest -Uri https://aka.ms/appsvconmashelpers -OutFile AppServiceHelperScripts.zip
+Expand-Archive .\AppServiceHelperScripts.zip
+
+.\AppServiceHelperScripts\Get-AzureStackRootCert.ps1 `
+    -PrivilegedEndpoint azs-ercs01 -CloudAdminCredential $CloudAdminCredential
+
+$certPass = ConvertTo-SecureString -String "P@ssw0rdP@ssw0rd" -AsPlainText -Force
+.\AppServiceHelperScripts\Create-AppServiceCerts.ps1 -DomainName local.azurestack.external `
+    -PfxPassword $certPass
+
+$result = .\AppServiceHelperScripts\Create-AADIdentityApp.ps1 -DirectoryTenantName $AADTenantName `
+    -AdminArmEndpoint adminmanagement.local.azurestack.external `
+    -TenantArmEndpoint management.local.azurestack.external `
+    -CertificateFilePath C:\Users\AzureStackAdmin\AppServiceHelperScripts\sso.appservice.local.azurestack.external.pfx `
+    -Environment AzureCloud `
+    -CertificatePassword $certPass `
+    -AzureStackAdminCredential $aadAdminCredential
+
+# Add grant to aad app
+$apsSSOappId = $result[1] 
+$tenantId = $azurecontext.Context.Tenant.Id
+$azureContext.Context.TokenCache.ReadItems() | Where-Object { $_.Resource -eq "https://graph.windows.net/"} 
+$refreshToken = ($azureContext.Context.TokenCache.ReadItems() | Where-Object { $_.Resource -eq "https://graph.windows.net/"}).refreshToken
+$body = "grant_type=refresh_token&refresh_token=$($refreshToken)&resource=74658136-14ec-4630-ad9b-26e160ff0fc6"
+$apiToken = Invoke-RestMethod "https://login.windows.net/$tenantId/oauth2/token" -Method POST -Body $body -ContentType 'application/x-www-form-urlencoded'
+$header = @{
+    'Authorization' = 'Bearer ' + $apiToken.access_token
+    'X-Requested-With'= 'XMLHttpRequest'
+    'x-ms-client-request-id'= [guid]::NewGuid()
+    'x-ms-correlation-id' = [guid]::NewGuid()
+}
+
+$url = "https://main.iam.ad.ext.azure.com/api/RegisteredApplications/$apsSSOappId/Consent?onBehalfOfAll=true"
+Invoke-RestMethod –Uri $url –Headers $header –Method POST -ErrorAction Stop
+
+# install App Service PR
+$cred = New-Object System.Management.Automation.PSCredential "appsvcadmin",$appsPassword 
+$sqlsession = New-PSSession 192.168.102.39 -Credential $cred -Port 5985
+
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/kongou-ae/AzureStackOperatorScripts/master/asdk/AppServiceDeploymentSettings.json -OutFile C:\Users\AzureStackAdmin\AppServiceDeploymentSettings.json
+$appconfig = Get-Content C:\Users\AzureStackAdmin\AppServiceDeploymentSettings.json
+$appconfig = $appconfig.Replace("<<IdentityApplicationId>>", $apsSSOappId)
+Out-File -FilePath C:\Users\AzureStackAdmin\AppServiceDeploymentSettings.json -InputObject $appconfig
+
+Copy-Item C:\Users\AzureStackAdmin\AppServiceHelperScripts\sso.appservice.local.azurestack.external.pfx C:\Users\appsvcadmin.APS-SQL-0\Documents\ -ToSession $sqlsession
+Copy-Item C:\Users\AzureStackAdmin\AppServiceHelperScripts\api.appservice.local.azurestack.external.pfx C:\Users\appsvcadmin.APS-SQL-0\Documents\ -ToSession $sqlsession
+Copy-Item C:\Users\AzureStackAdmin\AppServiceHelperScripts\ftp.appservice.local.azurestack.external.pfx C:\Users\appsvcadmin.APS-SQL-0\Documents\ -ToSession $sqlsession
+Copy-Item C:\Users\AzureStackAdmin\AppServiceHelperScripts\_.appservice.local.azurestack.external.pfx C:\Users\appsvcadmin.APS-SQL-0\Documents\ -ToSession $sqlsession
+Copy-Item C:\Users\AzureStackAdmin\AppServiceHelperScripts\AzureStackCertificationAuthority.cer C:\Users\appsvcadmin.APS-SQL-0\Documents\ -ToSession $sqlsession
+Copy-Item C:\Users\AzureStackAdmin\AppServiceDeploymentSettings.json C:\Users\appsvcadmin.APS-SQL-0\Documents\ -ToSession $sqlsession
+
+$res = Invoke-Command -Session $sqlsession -ScriptBlock {
+    Invoke-WebRequest -Uri https://aka.ms/appsvconmasinstaller -OutFile C:\Users\appsvcadmin.APS-SQL-0\Documents\AppService.exe
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($Using:aadAdminCredential.Password)
+    $aadUnsecurePassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+    .\AppService.exe /quiet /log C:\Users\appsvcadmin.APS-SQL-0\Documents\appsinstall.txt Deploy UserName=$($Using:aadAdminCredential.UserName) Password=$aadUnsecurePassword ParamFile=C:\Users\appsvcadmin.APS-SQL-0\Documents\AppServiceDeploymentSettings.json
+}
+
+do{
+    Write-Output "Checking the progress of installing App Service..."
+    $progress = Invoke-Command -Session $sqlsession -ScriptBlock {
+        Get-Content C:\Users\appsvcadmin.APS-SQL-0\Documents\appsinstall.txt -Tail 1
+    }
+    sleep -s 300
+} while($progress -notlike "*Exit code:*")
+
+if ($progress -like "*Exit code: 0x0,*"){
+    Write-Output "The installation of App Service was successful."
+} else {
+    Write-Output "The installation of App Service was failed."
+}
