@@ -28,12 +28,24 @@ $requestHeader = @{
 }
 $contentType = "application/json;charset=utf-8"
 
-$serverUrl = $fqdn + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/local/servers?api-version=2018-02-01"
-$serverRes = Invoke-RestMethod -Uri $serverUrl -Method GET -Headers $requestHeader -ContentType $contentType
 
 $saveDir = $env:SystemDrive + "\Get-AzsAppServiceRoleLogs-"  + (Get-Date -Format yyyyMMdd-hhmmss)
 mkdir $saveDir | Out-Null
 
+$logFilename = $saveDir + "\" + (detectRole($_.properties.role)) + "servers.json"   
+$Url = $fqdn + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/local/servers?api-version=2018-02-01"
+$res = Invoke-RestMethod -Uri $Url -Method GET -Headers $requestHeader -ContentType $contentType
+$res | ConvertTo-Json -Depth 100 | Out-File $logFilename
+Write-Output "Created $logFilename"
+
+$logFilename = $saveDir + "\" + (detectRole($_.properties.role)) + "workerTiers.json"   
+$Url = $fqdn + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/local/workerTiers?api-version=2018-02-01"
+$res = Invoke-RestMethod -Uri $Url -Method GET -Headers $requestHeader -ContentType $contentType
+$res | ConvertTo-Json -Depth 100 | Out-File $logFilename
+Write-Output "Created $logFilename"
+
+$serverUrl = $fqdn + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/local/servers?api-version=2018-02-01"
+$serverRes = Invoke-RestMethod -Uri $serverUrl -Method GET -Headers $requestHeader -ContentType $contentType
 $serverRes | foreach {
     $logUrl = $fqdn + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/local/servers/" + $_.name  + "/log?api-version=2018-02-01"
     $logRes = Invoke-RestMethod -Uri $logUrl -Method GET -Headers $requestHeader -ContentType $contentType
@@ -42,3 +54,5 @@ $serverRes | foreach {
     $logRes.properties | ConvertTo-Json -Depth 100 | Out-File $logFilename
     Write-Output "Created $logFilename"
 }
+
+
