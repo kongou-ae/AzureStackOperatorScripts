@@ -2,7 +2,7 @@ $ErrorActionPreference = "stop"
 
 $CloudAdminCredential = Get-Credential -Credential azurestack\CloudAdmin
 $aadAdminCredential = Get-Credential -Message "Please input the account which you used to deplpoy ASDK"
-$ArmEndpoint = "https://adminmanagement.local.azurestack.external"
+$ArmEndpoint = "https://adminmanagement.uda.asdk.aimless.jp"
 $AADTenantName = "aimless2.onmicrosoft.com" 
 
 #######################################################################
@@ -25,6 +25,8 @@ expand-archive master.zip `
 #######################################################################
 
 Write-Host "Login Azure"
+Install-module AzureRm.Profile -Scope CurrentUser -Force
+Install-module AzureRm.Resources -Scope CurrentUser -Force
 $azureContext = Login-AzureRmAccount
 
 Import-Module C:\Users\AzureStackAdmin\AzureStack-Tools-master\Connect\AzureStack.Connect.psm1
@@ -45,18 +47,12 @@ $azsContext = Login-AzureRmAccount `
 # Register
 #######################################################################
 
-$cred = Get-Credential -UserName "azurestack.local\azurestackadmin" -Message "Please input password of CloudAdmin"
-$pep = New-PSSession -ComputerName azs-ercs01 -ConfigurationName PrivilegedEndpoint -Credential $cred
+$pep = New-PSSession -ComputerName azs-ercs01 -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
 $res = Invoke-Command -Session $pep -ScriptBlock {
     Get-AzureStackStampInformation
 }
 
-$res.DeploymentID
-
-Install-module AzureRm.Profile -Scope CurrentUser
-Install-module AzureRm.Resources -Scope CurrentUser
-
-Add-AzureRmAccount -EnvironmentName "AzureCloud"
+Get-AzureRmContext -ListAvailable | Where-Object { $_.Environment.Name -eq "AzureCloud"} | Select-AzureRmContext
 
 Get-AzureRmSubscription | Out-GridView -PassThru |Select-AzureRmSubscription
 Register-AzureRmResourceProvider -ProviderNamespace Microsoft.AzureStack
@@ -65,11 +61,10 @@ Import-Module C:\Users\AzureStackAdmin\azurestack-tools-master\Registration\Regi
 
 $RegistrationName = "asdk-" + $res.DeploymentID
 Set-AzsRegistration `
-   -PrivilegedEndpointCredential $cred `
+   -PrivilegedEndpointCredential $CloudAdminCredential `
    -PrivilegedEndpoint azs-ercs01 `
    -BillingModel development `
-   -RegistrationName $RegistrationName `
-   -AzureContext $azureContext
+   -RegistrationName $RegistrationName
    
 #######################################################################
 # Choco
