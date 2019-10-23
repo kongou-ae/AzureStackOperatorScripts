@@ -52,3 +52,28 @@ Download the latest AzureStack_Validation_Summary.html.
 ## Login-AzsAdminRmAccount.ps1
 
 Install powershell modules and login your Azure Stack stamp.
+
+## Get-AzsUserSubscriptionQuotaLimit.ps1
+
+Calculate the limit of Quotas per user subscriptions and export this limit as json file.
+
+```
+User Subscription Id: 4ca18c49-faf7-4ddb-a2f9-9987a6e7aab3
+
+Name                                               Value
+----                                               -----
+AvailabilitySetCount                               10   
+CoresLimit                                         100  
+VmScaleSetCount                                    100  
+VirtualMachineCount                                50   
+StandardManagedDiskAndSnapshotSize                 2048 
+PremiumManagedDiskAndSnapshotSize                  2048 
+NumberOfStorageAccounts                            20   
+CapacityInGb                                       10000
+MaxPublicIpsPerSubscription                        50   
+MaxVnetsPerSubscription                            50   
+MaxVirtualNetworkGatewaysPerSubscription           1    
+MaxVirtualNetworkGatewayConnectionsPerSubscription 2    
+MaxLoadBalancersPerSubscription                    50   
+MaxSecurityGroupsPerSubscription                   50   
+```
