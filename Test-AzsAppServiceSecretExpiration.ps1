@@ -39,8 +39,8 @@ $res | foreach-Object {
 }
 
 if ($flag -eq $true){
-    Write-Host "PASS"
+    Write-Host "PASS" -foregroundcolor Greem
 } else {
-    Write-Host "FAILED" -foregroundcolor Red
+    Write-Host "FAIL" -foregroundcolor Red
     Write-Host "You need a secret rotation in App Sercive Blade" 
 }
