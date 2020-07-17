@@ -12,7 +12,7 @@ function detectRole($roleNumber){
     return $roleName
 }
 
-$azContext = Get-AzureRMContext
+$azContext = Get-AzContext
 $azProfile = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile
 $profileClient = New-Object Microsoft.Azure.Commands.ResourceManager.Common.RMProfileClient($azProfile)
 $token = $profileClient.AcquireAccessToken($azContext.Tenant.TenantId)
@@ -23,9 +23,9 @@ $requestHeader = @{
     "Accept" = "application/json"
 }
 
-$subId = (Get-AzureRmSubscription).Id
+$subId = (Get-AzSubscription).Id
 $region = (Get-AzsRegionHealth).Name
-$adminManagementUrl = (Get-AzureRmEnvironment -Name AzureStackAdmin).ResourceManagerUrl
+$adminManagementUrl = (Get-AzEnvironment -Name AzureStackAdmin).ResourceManagerUrl
 
 $saveDir = $env:SystemDrive + "\Get-AzsAppServiceRoleLogs-"  + (Get-Date -Format yyyyMMdd-hhmmss)
 mkdir $saveDir | Out-Null
@@ -44,7 +44,7 @@ Write-Output "Created $logFilename"
 
 $serverUrl = $adminManagementUrl + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/$region/servers?api-version=2018-02-01"
 $serverRes = Invoke-RestMethod -Uri $serverUrl -Method GET -Headers $requestHeader -ContentType $contentType
-$serverRes | foreach {
+$serverRes | ForEach-Object {
     $logUrl = $adminManagementUrl + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/$region/servers/" + $_.name  + "/log?api-version=2018-02-01"
     $logRes = Invoke-RestMethod -Uri $logUrl -Method GET -Headers $requestHeader -ContentType $contentType
  

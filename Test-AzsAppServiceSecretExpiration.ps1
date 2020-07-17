@@ -1,6 +1,6 @@
 $ErrorActionPreference = "stop"
 
-$azContext = Get-AzureRMContext
+$azContext = Get-AzContext
 $azProfile = [Microsoft.Azure.Commands.Common.Authentication.Abstractions.AzureRmProfileProvider]::Instance.Profile
 $profileClient = New-Object Microsoft.Azure.Commands.ResourceManager.Common.RMProfileClient($azProfile)
 $token = $profileClient.AcquireAccessToken($azContext.Tenant.TenantId)
@@ -11,9 +11,9 @@ $requestHeader = @{
     "Accept" = "application/json"
 }
 
-$subId = (Get-AzureRmSubscription).Id
+$subId = (Get-AzSubscription).Id
 $region = (Get-AzsRegionHealth).Name
-$adminManagementUrl = (Get-AzureRmEnvironment -Name AzureStackAdmin).ResourceManagerUrl
+$adminManagementUrl = (Get-AzEnvironment -Name AzureStackAdmin).ResourceManagerUrl
 
 $Url = $adminManagementUrl + "/subscriptions/" + $subId + "/providers/Microsoft.Web.Admin/locations/$region/secrets?api-version=2018-02-01"
 
