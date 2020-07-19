@@ -12,10 +12,12 @@ $actionPlanId = $Matches[1]
 
 $actionPlan = Get-AzsActionPlan -PlanId $actionPlanId
 
+
 $action = [ordered]@{
     "startTime" = $actionPlan.properties.startTime
     "endTime" = $actionPlan.properties.endTime
     "provisioningState" = $actionPlan.properties.provisioningState
+    "error" = $deployment.properties.error
 }
 
 $result = [ordered]@{
