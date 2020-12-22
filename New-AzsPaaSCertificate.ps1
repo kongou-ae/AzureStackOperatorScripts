@@ -89,7 +89,7 @@ switch($rp){
     }
 }
 
-$reqs = Get-ChildItem "C:\Users\MatsumotoYusuke\azscsr" | Where-Object { $_.Name -like "*.req"}
+$reqs = Get-ChildItem "$HOME\azscsr" | Where-Object { $_.Name -like "*.req"}
 
 Write-Log  "Get the access token to call Azure DNS" "Green"
 Get-AzSubscription -subscriptionId $subscriptionId | Select-AzSubscription
