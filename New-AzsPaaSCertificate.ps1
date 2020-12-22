@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param (
     [Parameter(mandatory=$true)]
-    [ValidateSet("EventHubs" , "IoTHub")]
+    [ValidateSet("EventHubs" , "IoTHub", "ccc")]
     [string]
     $rp,
     [Parameter(mandatory=$true)]
@@ -26,9 +26,9 @@ param (
 
 # This script supports only EventHubs now.
 
-#Requires -Modules Microsoft.AzureStack.ReadinessChecker
+#Requires -Modules @{ ModuleName="Microsoft.AzureStack.ReadinessChecker"; ModuleVersion="1.2100.1396.426" }
 #Requires -Modules Posh-ACME
-#Requires -Modules Az.Accounts
+#Requires -Modules @{ ModuleName="Az.Accounts"; ModuleVersion="2.2.2" }
 #Requires -RunAsAdministrator
 
 $ErrorActionPreference = "stop"
@@ -95,13 +95,14 @@ Write-Log  "Get the access token to call Azure DNS" "Green"
 Get-AzSubscription -subscriptionId $subscriptionId | Select-AzSubscription
 $token = (Get-AzAccessToken).Token
 
-Set-PAServer LE_STAGE
+#Set-PAServer LE_STAGE
 
 Write-Log "Sign the certificate for $rp by Let's encrypt" "Green"
 switch($rp){
     "EventHubs" {
         $result = New-AzsEventHubCertificate -reqs $reqs
         $certPath = ($result.FullChainFile).Replace("\fullchain.cer","")
+        Write-Output $result
     }
     "IoTHub" {
 
@@ -111,4 +112,4 @@ switch($rp){
 Write-Log "Export the certificate as a pfx file" "Green"
 Get-ChildItem $certpath |Where-Object { $_.Name -ne "fullchain.cer"} | Rename-Item -NewName{$_.Name + ".tmp"}
 $securePfxpass = ConvertTo-SecureString -String $pfxpass -Force -AsPlainText
-ConvertTo-AzsPFX -Path $certPath -pfxPassword $securePfxpass -ExportPath $outputDirectory
+ConvertTo-AzsPFX -Path $certPath -pfxPassword $securePfxpass -ExportPath $outputDirectory 
