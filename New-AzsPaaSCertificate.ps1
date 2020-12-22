@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param (
     [Parameter(mandatory=$true)]
-    [ValidateSet("EventHubs" , "IoTHub", "ccc")]
+    [ValidateSet("EventHubs" , "IoTHub")]
     [string]
     $rp,
     [Parameter(mandatory=$true)]
